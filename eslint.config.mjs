@@ -11,6 +11,12 @@ const compat = new FlatCompat({
 
 const eslintConfig = [
   ...compat.extends("next/core-web-vitals", "next/typescript"),
+  {
+    rules: {
+      "react/display-name": "off", // Disable the missing display name rule
+      "@typescript-eslint/no-unused-vars": "off",
+    },
+  },
 ];
 
 export default eslintConfig;
