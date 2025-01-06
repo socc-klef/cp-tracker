@@ -47,6 +47,21 @@ const platforms = [
       },
     ],
   },
+  {
+    name: "CodeChef",
+    icon: "👨‍🍳",
+    stats: {
+      rating: 1950,
+      solved: 280,
+      rank: "5 Star",
+      contests: 25,
+    },
+    recentSubmissions: [
+      { problem: "Chef and Arrays", result: "Accepted", date: "2023-06-15" },
+      { problem: "Prime Game", result: "Partial", date: "2023-06-14" },
+      { problem: "Maximum Subarray", result: "Accepted", date: "2023-06-13" },
+    ],
+  },
 ];
 
 export default function PlatformList() {
