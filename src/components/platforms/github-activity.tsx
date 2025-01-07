@@ -8,11 +8,26 @@ import {
   GitCommit,
   Circle,
   ChevronDown,
-  Sun,
-  Moon,
 } from "lucide-react";
-import { Switch } from "@/components/ui/switch";
 import { useTheme } from "next-themes";
+
+type Activity = {
+  type: string;
+  repo: string;
+  date: string;
+};
+
+type GitHubData = {
+  name: string;
+  icon: string;
+  stats: {
+    repositories: number;
+    stars: number;
+    followers: number;
+    contributions: number;
+  };
+  recentActivity: Activity[];
+};
 
 const GitHubActivity = () => {
   const [isExpanded, setIsExpanded] = useState(false);
@@ -23,19 +38,19 @@ const GitHubActivity = () => {
     setMounted(true);
   }, []);
 
-  const githubData = {
+  const githubData: GitHubData = {
     name: "GitHub",
     icon: "🐙",
     stats: {
-      repositories: 45,
-      stars: 120,
-      followers: 89,
-      contributions: 847,
+      repositories: 38, // Updated value
+      stars: 21, // Updated value
+      followers: 43, // Updated value
+      contributions: 60, // Updated value
     },
     recentActivity: [
-      { type: "Push", repo: "algorithm-visualizer", date: "2023-06-15" },
-      { type: "PullRequest", repo: "open-source-project", date: "2023-06-14" },
-      { type: "Issue", repo: "web-framework", date: "2023-06-13" },
+      { type: "Push", repo: "new-project", date: "2024-12-01" }, // Updated value
+      { type: "PullRequest", repo: "my-library", date: "2024-11-28" }, // Updated value
+      { type: "Issue", repo: "design-system", date: "2024-11-25" }, // Updated value
     ],
   };
 
@@ -141,17 +156,22 @@ const GitHubActivity = () => {
                     Recent Activity
                   </h3>
                   <div className="space-y-2">
-                    {githubData.recentActivity.map((activity, index) => (
-                      <div key={index} className="flex items-center space-x-2">
-                        <span className="text-gray-600 dark:text-gray-400">
-                          {getActivityIcon(activity.type)}
-                        </span>
-                        <span className="text-sm dark:text-gray-200">
-                          {activity.type} on{" "}
-                          <span className="font-medium">{activity.repo}</span>
-                        </span>
-                      </div>
-                    ))}
+                    {githubData.recentActivity.map(
+                      (activity: Activity, index) => (
+                        <div
+                          key={index}
+                          className="flex items-center space-x-2"
+                        >
+                          <span className="text-gray-600 dark:text-gray-400">
+                            {getActivityIcon(activity.type)}
+                          </span>
+                          <span className="text-sm dark:text-gray-200">
+                            {activity.type} on{" "}
+                            <span className="font-medium">{activity.repo}</span>
+                          </span>
+                        </div>
+                      )
+                    )}
                   </div>
                 </div>
               </div>

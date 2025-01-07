@@ -3,8 +3,11 @@ import re
 import requests
 from bs4 import BeautifulSoup
 from flask import Flask, request, jsonify
+from flask_cors import CORS  # Import CORS from flask_cors
 
 app = Flask(__name__)
+CORS(app,origins="http://localhost:3000")  # Enable CORS for /api/* routes
+
 
 # Constants
 BASE_URL = "https://www.codechef.com/users/"
@@ -301,6 +304,6 @@ def scrape_user_data():
 @app.route("/", methods=["GET"])
 def test():
     return "LMAO"
+
 if __name__ == '__main__':
     app.run(debug=True)
-

@@ -9,10 +9,10 @@ const platforms = [
     name: "Codeforces",
     icon: "🏆",
     stats: {
-      rating: 1800,
-      solved: 500,
-      rank: "Expert",
-      contests: 30,
+      rating: 950, // Below average rating
+      solved: 30, // A modest number of problems solved
+      rank: "Newbie", // Beginner rank
+      contests: 5, // Participated in a few contests
     },
     recentSubmissions: [
       { problem: "Two Sum", result: "Accepted", date: "2023-06-15" },
@@ -28,10 +28,10 @@ const platforms = [
     name: "LeetCode",
     icon: "🧠",
     stats: {
-      rating: 2100,
-      solved: 350,
-      rank: "Guardian",
-      contests: 20,
+      rating: 1200, // Modest rating
+      solved: 25, // Small number of problems solved
+      rank: "Bronze", // Reflects beginner level
+      contests: 3, // Participated in only a few contests
     },
     recentSubmissions: [
       { problem: "Add Two Numbers", result: "Accepted", date: "2023-06-15" },
@@ -51,10 +51,10 @@ const platforms = [
     name: "CodeChef",
     icon: "👨‍🍳",
     stats: {
-      rating: 1950,
-      solved: 280,
-      rank: "5 Star",
-      contests: 25,
+      rating: 1050, // Beginner rating
+      solved: 15, // Few problems solved
+      rank: "2 Star", // Reflects a beginner level
+      contests: 4, // Participated in a small number of contests
     },
     recentSubmissions: [
       { problem: "Chef and Arrays", result: "Accepted", date: "2023-06-15" },
