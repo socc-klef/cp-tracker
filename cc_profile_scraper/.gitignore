@@ -1,0 +1,30 @@
+# Byte-compiled files
+*.pyc
+*.pyo
+__pycache__/
+
+# Environment variables and settings
+.env
+instance/
+
+# Flask extensions
+.mypy_cache/
+.db/
+*.sqlite3
+
+# Logs
+logs/
+*.log
+
+# Virtual environments
+venv/
+ENV/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+
+# Static file directories (if auto-generated)
+static/
+media/
