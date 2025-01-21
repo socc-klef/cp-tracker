@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
-const CODECHEF_ENDPOINT = "https://socc1cptracker.pythonanywhere.com/";
+const CODECHEF_ENDPOINT = "<REPLACE WITH YOUR PROFILE SCRAPER URL (Flask App)>";
 
 type CodeChefPlatformData = {
   name: string;
