@@ -25,7 +25,7 @@ export default function AboutPage() {
           </Button>
           <Button asChild variant="outline" size="lg">
             <Link href="https://www.linkedin.com/in/yourusername">
-              <Linkedin className="mr-2 h-5 w-5" /> Developer's LinkedIn
+              <Linkedin className="mr-2 h-5 w-5" /> Developer&#39;s LinkedIn
             </Link>
           </Button>
         </div>

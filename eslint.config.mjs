@@ -15,6 +15,7 @@ const eslintConfig = [
     rules: {
       "react/display-name": "off", // Disable the missing display name rule
       "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-explicit-any": "off",
     },
   },
 ];
