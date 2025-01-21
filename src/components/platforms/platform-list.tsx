@@ -1,71 +1,115 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import PlatformDetails from "./platform-details";
+import { getLocalItem } from "@/utils";
+import {
+  fetchCodeChefData,
+  fetchLeetCodeData,
+  fetchCodeforcesData,
+} from "@/api-utils";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
-const platforms = [
-  {
-    name: "Codeforces",
-    icon: "🏆",
-    stats: {
-      rating: 950, // Below average rating
-      solved: 30, // A modest number of problems solved
-      rank: "Newbie", // Beginner rank
-      contests: 5, // Participated in a few contests
-    },
-    recentSubmissions: [
-      { problem: "Two Sum", result: "Accepted", date: "2023-06-15" },
-      {
-        problem: "Reverse Integer",
-        result: "Wrong Answer",
-        date: "2023-06-14",
-      },
-      { problem: "Palindrome Number", result: "Accepted", date: "2023-06-13" },
-    ],
-  },
-  {
-    name: "LeetCode",
-    icon: "🧠",
-    stats: {
-      rating: 1200, // Modest rating
-      solved: 25, // Small number of problems solved
-      rank: "Bronze", // Reflects beginner level
-      contests: 3, // Participated in only a few contests
-    },
-    recentSubmissions: [
-      { problem: "Add Two Numbers", result: "Accepted", date: "2023-06-15" },
-      {
-        problem: "Longest Substring",
-        result: "Time Limit Exceeded",
-        date: "2023-06-14",
-      },
-      {
-        problem: "Median of Two Sorted Arrays",
-        result: "Accepted",
-        date: "2023-06-13",
-      },
-    ],
-  },
-  {
-    name: "CodeChef",
-    icon: "👨‍🍳",
-    stats: {
-      rating: 1050, // Beginner rating
-      solved: 15, // Few problems solved
-      rank: "2 Star", // Reflects a beginner level
-      contests: 4, // Participated in a small number of contests
-    },
-    recentSubmissions: [
-      { problem: "Chef and Arrays", result: "Accepted", date: "2023-06-15" },
-      { problem: "Prime Game", result: "Partial", date: "2023-06-14" },
-      { problem: "Maximum Subarray", result: "Accepted", date: "2023-06-13" },
-    ],
-  },
-];
+interface Submission {
+  problem: string;
+  result: string;
+  date: string;
+}
+
+interface Platform {
+  name: string;
+  icon: string;
+  stats: {
+    rating: number;
+    solved: number;
+    rank: string | number;
+    contests: number;
+  };
+  recentSubmissions: Submission[];
+}
 
 export default function PlatformList() {
+  const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function fetchData() {
+      const usernames = JSON.parse(getLocalItem("usernames") || "{}");
+
+      if (!usernames.Codeforces && !usernames.LeetCode && !usernames.CodeChef) {
+        setError("No usernames found. Please set them in your profile.");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const [codeforcesData, leetcodeData, codechefData] = await Promise.all([
+          usernames.Codeforces
+            ? fetchCodeforcesData(usernames.Codeforces)
+            : null,
+          usernames.LeetCode ? fetchLeetCodeData(usernames.LeetCode) : null,
+          usernames.CodeChef ? fetchCodeChefData(usernames.CodeChef) : null,
+        ]);
+
+        setPlatforms(
+          [codeforcesData, leetcodeData, codechefData].filter(
+            (data): data is Platform => data !== null
+          )
+        );
+      } catch (error) {
+        console.error("Error fetching data:", error);
+        setError("Error fetching platform data. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    }
+
+    fetchData();
+  }, []);
+
+  if (isLoading) {
+    return (
+      <Card className="w-full my-6">
+        <CardHeader>
+          <CardTitle>Coding Platforms</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center items-center h-24">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="w-full my-6">
+        <CardHeader>
+          <CardTitle>Coding Platforms</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-red-500">{error}</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (platforms.length === 0) {
+    return (
+      <Card className="w-full my-6">
+        <CardHeader>
+          <CardTitle>Coding Platforms</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center">No platform data available.</div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">

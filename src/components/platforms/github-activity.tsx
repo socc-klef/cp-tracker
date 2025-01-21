@@ -9,7 +9,17 @@ import {
   Circle,
   ChevronDown,
 } from "lucide-react";
-import { useTheme } from "next-themes";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { getLocalItem } from "@/utils";
+import { fetchGitHubData } from "@/api-utils";
 
 type Activity = {
   type: string;
@@ -30,29 +40,34 @@ type GitHubData = {
 };
 
 const GitHubActivity = () => {
+  const [githubData, setGitHubData] = useState<GitHubData | null>(null);
   const [isExpanded, setIsExpanded] = useState(false);
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    const fetchData = async () => {
+      const usernames = JSON.parse(getLocalItem("usernames") || "{}");
+      const githubUsername = usernames.GitHub;
 
-  const githubData: GitHubData = {
-    name: "GitHub",
-    icon: "🐙",
-    stats: {
-      repositories: 38, // Updated value
-      stars: 21, // Updated value
-      followers: 43, // Updated value
-      contributions: 60, // Updated value
-    },
-    recentActivity: [
-      { type: "Push", repo: "new-project", date: "2024-12-01" }, // Updated value
-      { type: "PullRequest", repo: "my-library", date: "2024-11-28" }, // Updated value
-      { type: "Issue", repo: "design-system", date: "2024-11-25" }, // Updated value
-    ],
-  };
+      if (!githubUsername) {
+        setError("GitHub username not found. Please set it in your profile.");
+        setIsLoading(false);
+        return;
+      }
+
+      try {
+        const data = await fetchGitHubData(githubUsername);
+        setGitHubData(data);
+      } catch (error) {
+        setError("Error fetching GitHub data. Please try again later.");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const getActivityIcon = (type: string) => {
     switch (type) {
@@ -67,119 +82,108 @@ const GitHubActivity = () => {
     }
   };
 
-  if (!mounted) return null;
+  if (isLoading) {
+    return (
+      <Card className="w-full my-6">
+        <CardHeader>
+          <CardTitle>GitHub Activity</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex justify-center items-center h-24">
+            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900"></div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card className="w-full my-6">
+        <CardHeader>
+          <CardTitle>GitHub Activity</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center text-red-500">{error}</div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (!githubData) {
+    return null;
+  }
 
   return (
-    <motion.div
-      className="w-full bg-white dark:bg-gray-800 rounded-lg shadow-sm transition-shadow border dark:border-gray-700 my-6"
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
+    <Card
+      className="w-full my-6 cursor-pointer hover:shadow-md transition-shadow duration-200"
+      onClick={() => setIsExpanded(!isExpanded)}
     >
-      <div className="p-4 flex items-center justify-between">
-        <button
-          className="flex-grow flex items-center justify-between"
-          onClick={() => setIsExpanded(!isExpanded)}
-          aria-expanded={isExpanded}
-          aria-controls="github-details"
-        >
-          <div className="flex items-center space-x-3">
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center space-x-2">
             <span className="text-2xl">{githubData.icon}</span>
-            <span className="font-semibold text-lg dark:text-white">
-              {githubData.name}
-            </span>
+            <span>{githubData.name}</span>
           </div>
-          <div className="flex items-center space-x-6">
-            <div className="text-right">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Repositories
-              </div>
-              <div className="font-semibold dark:text-white">
-                {githubData.stats.repositories}
-              </div>
-            </div>
-            <div className="text-right">
-              <div className="text-sm text-gray-600 dark:text-gray-400">
-                Stars
-              </div>
-              <div className="font-semibold dark:text-white">
-                {githubData.stats.stars}
-              </div>
-            </div>
-            <motion.div
-              animate={{ rotate: isExpanded ? 180 : 0 }}
-              className="ml-2 text-gray-600 dark:text-gray-400"
-            >
-              <ChevronDown />
-            </motion.div>
-          </div>
-        </button>
-      </div>
-
+          <motion.div
+            animate={{ rotate: isExpanded ? 180 : 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <ChevronDown className="h-5 w-5" />
+          </motion.div>
+        </CardTitle>
+      </CardHeader>
       <AnimatePresence>
         {isExpanded && (
           <motion.div
-            id="github-details"
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden"
+            transition={{ duration: 0.2 }}
           >
-            <div className="p-4 border-t bg-muted">
-              <div className="grid md:grid-cols-2 gap-4">
-                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                  <h3 className="font-semibold mb-3 dark:text-white">
-                    Contribution Stats
-                  </h3>
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        Contributions
-                      </div>
-                      <div className="font-semibold dark:text-white">
-                        {githubData.stats.contributions}
-                      </div>
+            <CardContent>
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+                  {Object.entries(githubData.stats).map(([key, value]) => (
+                    <div key={key} className="bg-muted p-4 rounded-lg">
+                      <dt className="text-sm font-medium text-muted-foreground">
+                        {key.charAt(0).toUpperCase() + key.slice(1)}
+                      </dt>
+                      <dd className="mt-1 text-2xl font-semibold">{value}</dd>
                     </div>
-                    <div>
-                      <div className="text-sm text-gray-600 dark:text-gray-400">
-                        Followers
-                      </div>
-                      <div className="font-semibold dark:text-white">
-                        {githubData.stats.followers}
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
-
-                <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-lg">
-                  <h3 className="font-semibold mb-3 dark:text-white">
-                    Recent Activity
-                  </h3>
-                  <div className="space-y-2">
-                    {githubData.recentActivity.map(
-                      (activity: Activity, index) => (
-                        <div
-                          key={index}
-                          className="flex items-center space-x-2"
-                        >
-                          <span className="text-gray-600 dark:text-gray-400">
-                            {getActivityIcon(activity.type)}
-                          </span>
-                          <span className="text-sm dark:text-gray-200">
-                            {activity.type} on{" "}
-                            <span className="font-medium">{activity.repo}</span>
-                          </span>
-                        </div>
-                      )
-                    )}
-                  </div>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Repository</TableHead>
+                        <TableHead>Date</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {githubData.recentActivity.map((activity, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">
+                            <div className="flex items-center space-x-2">
+                              {getActivityIcon(activity.type)}
+                              <span>{activity.type}</span>
+                            </div>
+                          </TableCell>
+                          <TableCell>{activity.repo}</TableCell>
+                          <TableCell>{activity.date}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
               </div>
-            </div>
+            </CardContent>
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </Card>
   );
 };
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -18,13 +18,17 @@ import { addLocalItem, getLocalItem } from "@/utils";
 
 const platforms = ["Codeforces", "LeetCode", "CodeChef", "GitHub"];
 
-const UsernameForm = ({ onUpdate }: { onUpdate: () => void }) => {
+interface UsernameFormProps {
+  onUpdate: () => void;
+}
+
+const UsernameForm: React.FC<UsernameFormProps> = ({ onUpdate }) => {
   const [username, setUsername] = useState("");
   const [platform, setPlatform] = useState("");
   const [errors, setErrors] = useState({ username: "", platform: "" });
   const { toast } = useToast();
 
-  const validateForm = () => {
+  const validateForm = useCallback(() => {
     let isValid = true;
     const newErrors = { username: "", platform: "" };
 
@@ -43,38 +47,41 @@ const UsernameForm = ({ onUpdate }: { onUpdate: () => void }) => {
 
     setErrors(newErrors);
     return isValid;
-  };
+  }, [username, platform]);
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = useCallback(
+    (e: React.FormEvent) => {
+      e.preventDefault();
 
-    if (!validateForm()) {
-      return;
-    }
+      if (!validateForm()) {
+        return;
+      }
 
-    // Get current usernames from localStorage (decoded)
-    const storedUsernames = JSON.parse(getLocalItem("usernames") || "{}");
+      // Get current usernames from localStorage (decoded)
+      const storedUsernames = JSON.parse(getLocalItem("usernames") || "{}");
 
-    // Update the username for the selected platform
-    storedUsernames[platform] = username;
+      // Update the username for the selected platform
+      storedUsernames[platform] = username;
 
-    // Save the updated data back to localStorage (encoded)
-    addLocalItem("usernames", JSON.stringify(storedUsernames));
+      // Save the updated data back to localStorage (encoded)
+      addLocalItem("usernames", JSON.stringify(storedUsernames));
 
-    // Show success toast
-    toast({
-      title: "Success",
-      description: `Username ${username} added for ${platform}`,
-    });
+      // Show success toast
+      toast({
+        title: "Success",
+        description: `Username ${username} added for ${platform}`,
+      });
 
-    // Reset the form state
-    setUsername("");
-    setPlatform("");
-    setErrors({ username: "", platform: "" });
+      // Reset the form state
+      setUsername("");
+      setPlatform("");
+      setErrors({ username: "", platform: "" });
 
-    // Trigger update in parent component
-    onUpdate();
-  };
+      // Trigger update in parent component
+      onUpdate();
+    },
+    [username, platform, validateForm, toast, onUpdate]
+  );
 
   return (
     <motion.form
