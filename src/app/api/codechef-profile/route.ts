@@ -35,6 +35,7 @@ export async function GET(req: NextRequest) {
       `${CODECHEF_ENDPOINT}/get-cc-data?uname=${username}`
     );
     const data = await res.json();
+    console.log(`Data from Codechef ${data}`);
 
     const platformData: CodeChefPlatformData = {
       name: "CodeChef",
