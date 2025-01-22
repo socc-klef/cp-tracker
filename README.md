@@ -6,7 +6,6 @@ A simple competitive programming tracker that allows users to add their username
 
 - **Multi-platform support**: Add usernames from LeetCode, CodeChef, CodeForces, and GitHub.
 - **Unified dashboard**: View your stats and achievements from all platforms in one place.
-- **Export data**: Export your data in a structured format (e.g., JSON, CSV).
 - **Responsive design**: Built with TailwindCSS, ensuring a responsive and mobile-friendly UI.
 - **Smooth animations**: Powered by Framer Motion for a dynamic user experience.
 - **Elegant UI**: Customizable components with ShadCN for a clean and modern design.
