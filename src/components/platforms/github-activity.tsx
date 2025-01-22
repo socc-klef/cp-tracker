@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   GitBranch,
@@ -8,6 +8,7 @@ import {
   GitCommit,
   Circle,
   ChevronDown,
+  RefreshCcw,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -18,8 +19,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getLocalItem } from "@/utils";
+import { Button } from "@/components/ui/button";
 import { fetchGitHubData } from "@/api-utils";
+import { getLocalItem } from "@/utils";
 
 type Activity = {
   type: string;
@@ -44,29 +46,59 @@ const GitHubActivity = () => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [lastFetchTime, setLastFetchTime] = useState<number | null>(null);
+
+  const loadFromSessionStorage = () => {
+    const savedData = localStorage.getItem("githubData");
+    if (savedData) {
+      const parsedData = JSON.parse(savedData);
+      setGitHubData(parsedData.data);
+      setLastFetchTime(parsedData.lastFetchTime);
+      setIsLoading(false);
+    }
+  };
+
+  const saveToSessionStorage = (data: GitHubData) => {
+    localStorage.setItem(
+      "githubData",
+      JSON.stringify({
+        data,
+        lastFetchTime: Date.now(),
+      })
+    );
+  };
+
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError(null);
+
+    const usernames = JSON.parse(getLocalItem("usernames") || "{}");
+    const githubUsername = usernames.GitHub;
+
+    if (!githubUsername) {
+      setError("GitHub username not found. Please set it in your profile.");
+      setIsLoading(false);
+      return;
+    }
+
+    try {
+      const data = await fetchGitHubData(githubUsername);
+      setGitHubData(data);
+      saveToSessionStorage(data);
+      setLastFetchTime(Date.now());
+    } catch (error) {
+      console.error("Error fetching GitHub data:", error);
+      setError("Error fetching GitHub data. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchData = async () => {
-      const usernames = JSON.parse(getLocalItem("usernames") || "{}");
-      const githubUsername = usernames.GitHub;
-
-      if (!githubUsername) {
-        setError("GitHub username not found. Please set it in your profile.");
-        setIsLoading(false);
-        return;
-      }
-
-      try {
-        const data = await fetchGitHubData(githubUsername);
-        setGitHubData(data);
-      } catch (error) {
-        setError("Error fetching GitHub data. Please try again later.");
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchData();
+    loadFromSessionStorage();
+    if (!localStorage.getItem("githubData")) {
+      fetchData();
+    }
   }, []);
 
   const getActivityIcon = (type: string) => {
@@ -105,6 +137,11 @@ const GitHubActivity = () => {
         </CardHeader>
         <CardContent>
           <div className="text-center text-red-500">{error}</div>
+          <div className="flex justify-center mt-4">
+            <Button variant="ghost" onClick={fetchData}>
+              Retry
+            </Button>
+          </div>
         </CardContent>
       </Card>
     );
@@ -115,22 +152,32 @@ const GitHubActivity = () => {
   }
 
   return (
-    <Card
-      className="w-full my-6 cursor-pointer hover:shadow-md transition-shadow duration-200"
-      onClick={() => setIsExpanded(!isExpanded)}
-    >
+    <Card className="w-full my-6 transition-shadow duration-200">
       <CardHeader>
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center space-x-2">
             <span className="text-2xl">{githubData.icon}</span>
             <span>{githubData.name}</span>
           </div>
-          <motion.div
-            animate={{ rotate: isExpanded ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-          >
-            <ChevronDown className="h-5 w-5" />
-          </motion.div>
+          <div className="flex items-center space-x-4">
+            {lastFetchTime && (
+              <span className="text-sm text-gray-500">
+                Last updated: {new Date(lastFetchTime).toLocaleString()}
+              </span>
+            )}
+            <Button variant="ghost" size="icon" onClick={fetchData}>
+              <RefreshCcw />
+            </Button>
+            <motion.div
+              animate={{ rotate: isExpanded ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+            >
+              <ChevronDown
+                className="h-5 w-5 cursor-pointer"
+                onClick={() => setIsExpanded(!isExpanded)}
+              />
+            </motion.div>
+          </div>
         </CardTitle>
       </CardHeader>
       <AnimatePresence>

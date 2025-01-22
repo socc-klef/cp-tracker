@@ -12,8 +12,6 @@ import {
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
 import { motion } from "framer-motion";
-
-// Import the utility functions for localStorage
 import { addLocalItem, getLocalItem } from "@/utils";
 
 const platforms = ["Codeforces", "LeetCode", "CodeChef", "GitHub"];
@@ -32,16 +30,16 @@ const UsernameForm: React.FC<UsernameFormProps> = ({ onUpdate }) => {
     let isValid = true;
     const newErrors = { username: "", platform: "" };
 
+    if (!platform) {
+      newErrors.platform = "Please select a platform";
+      isValid = false;
+    }
+
     if (!username.trim()) {
       newErrors.username = "Username is required";
       isValid = false;
     } else if (username.length < 3) {
       newErrors.username = "Username must be at least 3 characters long";
-      isValid = false;
-    }
-
-    if (!platform) {
-      newErrors.platform = "Please select a platform";
       isValid = false;
     }
 
@@ -57,27 +55,18 @@ const UsernameForm: React.FC<UsernameFormProps> = ({ onUpdate }) => {
         return;
       }
 
-      // Get current usernames from localStorage (decoded)
       const storedUsernames = JSON.parse(getLocalItem("usernames") || "{}");
-
-      // Update the username for the selected platform
       storedUsernames[platform] = username;
-
-      // Save the updated data back to localStorage (encoded)
       addLocalItem("usernames", JSON.stringify(storedUsernames));
 
-      // Show success toast
       toast({
         title: "Success",
         description: `Username ${username} added for ${platform}`,
       });
 
-      // Reset the form state
       setUsername("");
       setPlatform("");
       setErrors({ username: "", platform: "" });
-
-      // Trigger update in parent component
       onUpdate();
     },
     [username, platform, validateForm, toast, onUpdate]
@@ -92,26 +81,11 @@ const UsernameForm: React.FC<UsernameFormProps> = ({ onUpdate }) => {
       transition={{ duration: 0.5 }}
     >
       <div className="flex flex-col space-y-4">
+        {/* Platform Selection */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.5, delay: 0.1 }}
-        >
-          <Input
-            type="text"
-            placeholder="Enter your username"
-            value={username}
-            onChange={(e) => setUsername(e.target.value)}
-            className={errors.username ? "border-red-500" : ""}
-          />
-          {errors.username && (
-            <p className="text-red-500 text-sm mt-1">{errors.username}</p>
-          )}
-        </motion.div>
-        <motion.div
-          initial={{ opacity: 0, x: -20 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.5, delay: 0.2 }}
         >
           <Select value={platform} onValueChange={setPlatform}>
             <SelectTrigger className={errors.platform ? "border-red-500" : ""}>
@@ -129,6 +103,27 @@ const UsernameForm: React.FC<UsernameFormProps> = ({ onUpdate }) => {
             <p className="text-red-500 text-sm mt-1">{errors.platform}</p>
           )}
         </motion.div>
+
+        {/* Username Field */}
+        <motion.div
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+        >
+          <Input
+            type="text"
+            placeholder={`Enter your ${platform || "username"}`}
+            value={username}
+            onChange={(e) => setUsername(e.target.value)}
+            className={errors.username ? "border-red-500" : ""}
+            disabled={!platform}
+          />
+          {errors.username && (
+            <p className="text-red-500 text-sm mt-1">{errors.username}</p>
+          )}
+        </motion.div>
+
+        {/* Submit Button */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

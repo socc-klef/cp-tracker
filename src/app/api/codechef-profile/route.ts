@@ -2,7 +2,7 @@
 
 import { NextRequest, NextResponse } from "next/server";
 
-const CODECHEF_ENDPOINT = "https://socc1cptracker.pythonanywhere.com/";
+const CODECHEF_ENDPOINT = "http://localhost:5000";
 
 type CodeChefPlatformData = {
   name: string;

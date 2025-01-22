@@ -30,8 +30,16 @@ export async function GET(req: NextRequest) {
 
   try {
     const [userRes, eventsRes] = await Promise.all([
-      fetch(`https://api.github.com/users/${username}`),
-      fetch(`https://api.github.com/users/${username}/events`),
+      fetch(`https://api.github.com/users/${username}`, {
+        headers: {
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+        },
+      }),
+      fetch(`https://api.github.com/users/${username}/events`, {
+        headers: {
+          Authorization: `Bearer ${process.env.GITHUB_TOKEN}`,
+        },
+      }),
     ]);
 
     const user = await userRes.json();
@@ -60,7 +68,7 @@ export async function GET(req: NextRequest) {
   } catch (error) {
     console.error(error);
     return NextResponse.json(
-      { error: "Failed to fetch GitHub data" },
+      { error: "Failed to fetch GitHub data" + error },
       { status: 500 }
     );
   }

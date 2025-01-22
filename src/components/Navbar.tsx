@@ -104,7 +104,6 @@ const Navbar = () => {
             <Button
               variant="ghost"
               size="icon"
-              className="mt-4"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             >
               {theme === "dark" ? (
